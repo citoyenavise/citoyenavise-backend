@@ -1,0 +1,240 @@
+================================================================================
+PHASE 0.1 - INVENTAIRE STRICT
+BACKEND/SRC - État factuel du repo
+Aucun commentaire architectural - Uniquement ce qui EXISTE
+================================================================================
+
+MODULES CHARGÉS (CORE - 10 modules)
+================================================================================
+
+auth        → /api/v1/auth        | 391 lignes | service: 271
+users       → /api/v1/users       | 184 lignes | service: 118
+profiles    → /api/v1/profiles    | 446 lignes | service: 307
+posts       → /api/v1/posts       | 509 lignes | service: 375
+ideas       → /api/v1/ideas       | 648 lignes | service: 327
+comments    → /api/v1/comments    | 457 lignes | service: 246
+likes       → /api/v1/likes       | 316 lignes | service: 190
+search      → /api/v1/search      | 352 lignes | service: 159
+popular_system → /api/v1/popular  | 352 lignes | service: 163
+map         → /api/v1/map         | 276 lignes | service: 165
+
+TOTAL CORE: 3931 lignes
+
+================================================================================
+MODULES NON CHARGÉS (STANDBY - 17 modules)
+================================================================================
+
+admin ai_mascot analytics cms content establishments follow
+friends groups homepage influence_system moderation notifications
+official_pages programmes public_dashboard webhooks
+
+Chacun: 50 lignes (8 lignes service.js stub + autres fichiers)
+TOTAL STANDBY: 850 lignes
+
+================================================================================
+STRUCTURE CORE
+================================================================================
+
+app.js                   230 lignes
+config.js                 66 lignes
+moduleLoader.js          240 lignes
+SUBTOTAL: 536 lignes
+
+core/
+├── constants/            117 lignes (categories, errors, roles)
+├── eventBus.js           140 lignes
+├── middleware/           868 lignes (8 files: auth, errorHandler, rateLimit, etc)
+├── services/             931 lignes (5 files: database, cache, optimization, etc)
+├── utils/                173 lignes (jwt, logger)
+├── websocket/            225 lignes
+SUBTOTAL: 2454 lignes
+
+database/
+├── init.js                35 lignes
+├── migrationRunner.js    197 lignes
+SUBTOTAL: 232 lignes
+
+events/
+├── LikeAdded.js           59 lignes
+├── CommentCreated.js      38 lignes
+├── index.js               19 lignes
+SUBTOTAL: 116 lignes
+
+handlers/
+├── LikeAddedHandler.js   106 lignes
+├── CommentCreatedHandler.js 54 lignes
+├── index.js               20 lignes
+SUBTOTAL: 180 lignes
+
+================================================================================
+DÉPENDANCES eventBus (DÉTECTÉES - RÉELLES)
+================================================================================
+
+Modules utilisant eventBus:
+  1. likes/service.js      ligne 11: require('../../core/eventBus')
+  2. comments/service.js   ligne 10: require('../../core/eventBus')
+
+Émissions:
+  1. likes/service.js      ligne 75: eventBus.emit('like.added', ...)
+  2. comments/service.js   ligne 60: eventBus.emit('comment.created', ...)
+
+Handlers (enregistrés dans server.js):
+  1. LikeAddedHandler      → event: 'like.added'
+  2. CommentCreatedHandler → event: 'comment.created'
+
+AUTRES modules utilisant eventBus:
+  - AUCUN
+
+================================================================================
+ENDPOINTS EXACTS (par module)
+================================================================================
+
+auth/ (5 endpoints):
+  POST   /register
+  POST   /login
+  POST   /refresh
+  POST   /logout
+  GET    /me
+
+users/ (3 endpoints):
+  GET    /:id
+  PUT    /:id
+  DELETE /:id
+
+profiles/ (8 endpoints):
+  GET    /
+  GET    /:id
+  POST   /
+  PUT    /:id
+  GET    /:id/posts
+  GET    /:id/followers
+  POST   /:id/follow
+  DELETE /:id/follow
+
+posts/ (8 endpoints):
+  GET    /
+  GET    /:id
+  POST   /
+  PUT    /:id
+  DELETE /:id
+  POST   /:id/flag
+  POST   /:id/like
+  DELETE /:id/like
+
+ideas/ (routes.js: 88 lignes, routes multiline)
+  GET    / (listIdeas)
+  GET    /:id (getIdea)
+  POST   / (createIdea)
+  GET    /stats (getIdeaStats)
+  PUT    /:id (updateIdea)
+  DELETE /:id (deleteIdea)
+  POST   /:id/flag (flagIdea)
+  DELETE /:id/flag (unflagIdea)
+
+comments/ (5 endpoints):
+  POST   /
+  GET    /posts/:postId/comments
+  GET    /:commentId
+  PATCH  /:commentId
+  DELETE /:commentId
+
+likes/ (4 endpoints):
+  POST   /
+  DELETE /:postId
+  GET    /posts/:postId/likes
+  GET    /posts/:postId/likes/check
+
+search/ (3 endpoints):
+  GET    / (search)
+  GET    /posts (searchPostsOnly)
+  GET    /users (searchUsersOnly)
+
+popular_system/ (routes.js: 49 lignes, routes multiline)
+  GET    / (getPopularPosts)
+  GET    /stats (getStats)
+  GET    /trends (getTrends)
+  GET    /categories (getPopularCategories)
+
+map/ (4 endpoints):
+  GET    /nodes
+  POST   /nodes (requireRole: admin)
+  PUT    /nodes/:id (requireRole: admin)
+  DELETE /nodes/:id (requireRole: admin)
+
+STANDBY modules: 0 endpoints (routes vides ou inexistants)
+
+TOTAL ENDPOINTS ACTIFS: 53 endpoints
+
+================================================================================
+SERVICES.JS COMPARAISON (ligne par ligne)
+================================================================================
+
+Modules avec service.js > 100 lignes:
+  auth       271 lignes
+  posts      375 lignes
+  profiles   307 lignes
+  ideas      327 lignes
+  comments   246 lignes
+  likes      190 lignes
+  search     159 lignes
+  popular_system 163 lignes
+  map        165 lignes
+  users      118 lignes
+
+Modules avec service.js = 8 lignes (stub):
+  admin, ai_mascot, analytics, cms, content, establishments,
+  follow, friends, groups, homepage, influence_system, moderation,
+  notifications, official_pages, programmes, public_dashboard, webhooks
+
+================================================================================
+FAITS BRUTS (SANS INTERPRÉTATION)
+================================================================================
+
+Comptes:
+  - 27 modules existent dans modules/
+  - 10 modules sont dans coreModules (app.js)
+  - 17 modules sont commentés dans standbyModules
+  - 2 événements définis: like.added, comment.created
+  - 2 handlers définis: LikeAddedHandler, CommentCreatedHandler
+  - 2 services émettent des événements
+  - 0 services en standby n'émettent d'événements
+  - 53 endpoints actifs dans CORE
+  - 0 endpoints actifs dans STANDBY
+
+Lignes:
+  - app.js + config.js + moduleLoader.js: 536
+  - core/: 2454
+  - database/: 232
+  - events/: 116
+  - handlers/: 180
+  - modules CORE: 3931
+  - modules STANDBY: 850
+  - TOTAL: 7299 lignes
+
+Modèles observés:
+  - Tous modules CORE ont: controller.js, service.js, routes.js, index.js
+  - Certains modules CORE ont aussi: schema.js, validation.js
+  - Tous modules STANDBY ont: controller.js (9L), service.js (8L), routes.js (13L), schema.js (11L), index.js (9L)
+  - moduleLoader.js charge uniquement coreModules
+  - server.js déclare événements APRÈS app.listen()
+  - Middleware stacked dans app.js
+  - Aucun import circulaire visible
+  - Aucun module CORE importe d'autre module CORE
+  - Tous modules importent core/ (database, auth, logger, etc)
+
+Dépendances détectées:
+  - likes → core/eventBus
+  - comments → core/eventBus
+  - tous modules → core/services/database
+  - tous modules → core/middleware/auth
+  - tous modules → core/utils/logger
+
+Event flow:
+  - likes/service.js → eventBus.emit('like.added') → server.js listener → LikeAddedHandler
+  - comments/service.js → eventBus.emit('comment.created') → server.js listener → CommentCreatedHandler
+
+Aucun autre flux d'événement.
+
+================================================================================
+FIN INVENTAIRE STRICT
+================================================================================
