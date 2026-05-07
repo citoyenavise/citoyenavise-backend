@@ -16,6 +16,7 @@ const swaggerSpecs = require('./core/swagger');
 const requestLogger = require('./core/middleware/requestLogger');
 const { getGlobalLimiter, getAuthLimiter } = require('./core/middleware/rateLimit');
 const moduleLoader = require('./moduleLoader');
+const migrationRunner = require('./database/migrationRunner');
 
 // Initialize Sentry (if configured)
 let Sentry = null;
@@ -254,21 +255,42 @@ if (Sentry) {
 // Error handler (MUST be last)
 app.use(errorHandler);
 
-// Start server
-const PORT = process.env.PORT || 3000;
-const server = app.listen(PORT, () => {
-  logger.info(`🚀 Backend API running on http://localhost:${PORT}`, {
-    meta: { port: PORT, env: process.env.NODE_ENV },
-  });
-});
+// Initialize and start server
+async function startServer() {
+  try {
+    // Run pending migrations
+    logger.info('🔄 Running database migrations...');
+    await migrationRunner.runPendingMigrations();
+    logger.info('✅ Migrations complete');
+  } catch (err) {
+    logger.error('❌ Migration failed', { meta: { error: err.message } });
+    process.exit(1);
+  }
 
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  logger.info('SIGTERM received, shutting down gracefully...');
-  server.close(() => {
-    logger.info('Server closed');
-    process.exit(0);
+  // Start server
+  const PORT = process.env.PORT || 3000;
+  const server = app.listen(PORT, () => {
+    logger.info(`🚀 Backend API running on http://localhost:${PORT}`, {
+      meta: { port: PORT, env: process.env.NODE_ENV },
+    });
   });
-});
+
+  // Graceful shutdown
+  process.on('SIGTERM', () => {
+    logger.info('SIGTERM received, shutting down gracefully...');
+    server.close(() => {
+      logger.info('Server closed');
+      process.exit(0);
+    });
+  });
+}
+
+// Start if this is the main module
+if (require.main === module) {
+  startServer().catch((err) => {
+    logger.error('Failed to start server', { meta: { error: err.message } });
+    process.exit(1);
+  });
+}
 
 module.exports = app;
