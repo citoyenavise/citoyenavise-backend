@@ -40,7 +40,6 @@ CREATE INDEX IF NOT EXISTS idx_flags_resolved_at ON flags(resolved_at);
 CREATE INDEX IF NOT EXISTS idx_map_nodes_profile_id ON map_nodes(profile_id);
 CREATE INDEX IF NOT EXISTS idx_map_nodes_province ON map_nodes(province);
 -- Spatial index for PostGIS queries
-CREATE INDEX IF NOT EXISTS idx_map_nodes_geom ON map_nodes USING GIST(geom);
 
 -- Content pages indexes
 CREATE INDEX IF NOT EXISTS idx_content_pages_slug ON content_pages(slug);
