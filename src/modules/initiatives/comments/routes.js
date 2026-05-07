@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router({ mergeParams: true });
 const commentController = require('./controller');
 const { authRequired, authOptional } = require('../../../core/middleware/auth');
-const asyncHandler = require('../../../core/middleware/asyncHandler');
+const { asyncHandler } = require('../../../core/middleware/errorHandler');
 
 // List comments (public)
 router.get('/', authOptional, asyncHandler((req, res, next) => commentController.listComments(req, res, next)));

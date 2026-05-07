@@ -4,7 +4,7 @@ const initiativeController = require('./controller');
 const votesRoutes = require('./votes/routes');
 const commentsRoutes = require('./comments/routes');
 const { authRequired, authOptional } = require('../../core/middleware/auth');
-const asyncHandler = require('../../core/middleware/asyncHandler');
+const { asyncHandler } = require('../../core/middleware/errorHandler');
 
 // List initiatives (public)
 router.get('/', authOptional, asyncHandler((req, res, next) => initiativeController.list(req, res, next)));

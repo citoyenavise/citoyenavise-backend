@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 const controller = require('./controller');
 const { authRequired, authOptional } = require('../../core/middleware/auth');
-const asyncHandler = require('../../core/middleware/asyncHandler');
-const AppError = require('../../core/errors/AppError');
+const { asyncHandler } = require('../../core/middleware/errorHandler');
+const AppError = require('../../core/errors');
 
 // Admin-only middleware
 const adminOnly = (req, res, next) => {

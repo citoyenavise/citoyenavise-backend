@@ -1,4 +1,4 @@
-const { query, transaction } = require('../../../core/database');
+const { query, transaction } = require('../../../core/services/database');
 const { eventBus } = require('../../../core/eventBus');
 const AppError = require('../../../core/errors/AppError');
 const logger = require('../../../core/utils/logger');
