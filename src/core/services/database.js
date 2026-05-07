@@ -6,12 +6,33 @@ const { Pool } = require('pg');
 const config = require('../../config');
 const logger = require('../utils/logger');
 
-const pool = new Pool({
-  connectionString: config.DATABASE_URL,
-  max: config.DB_POOL_SIZE,
+const poolConfig = {
+  connectionString: process.env.DATABASE_URL,
+  max: parseInt(process.env.DB_POOL_SIZE, 10) || 10,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
-});
+  application_name: 'citoyenavise_backend',
+};
+
+// SSL configuration pour Render PostgreSQL
+if (process.env.DATABASE_URL && process.env.DATABASE_URL.includes('render.com')) {
+  poolConfig.ssl = {
+    rejectUnauthorized: false,
+  };
+}
+
+// Log DATABASE_URL for debugging
+if (!process.env.DATABASE_URL) {
+  logger.error('❌ DATABASE_URL is NOT defined!');
+} else {
+  const hostMatch = process.env.DATABASE_URL.match(/@([^:/]+)/);
+  const host = hostMatch ? hostMatch[1] : 'unknown';
+  logger.info(`✅ Database URL configured`, {
+    meta: { host, isRender: host.includes('render.com') },
+  });
+}
+
+const pool = new Pool(poolConfig);
 
 pool.on('error', (err) => {
   logger.error('Unexpected error on idle client', { meta: { error: err } });

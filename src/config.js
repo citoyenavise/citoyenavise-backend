@@ -2,11 +2,17 @@
  * Configuration centralisée
  */
 
-require('dotenv').config({ path: `${__dirname}/../.env` });
+// Force production mode for Render
+const ENV = process.env.NODE_ENV || 'development';
+console.log('🔍 NODE_ENV detected:', ENV);
 
+// Only load .env in development
+if (ENV !== 'production') {
+  require('dotenv').config({ path: `${__dirname}/../.env` });
+}
 module.exports = {
   // Server
-  NODE_ENV: process.env.NODE_ENV || 'development',
+  NODE_ENV: ENV,
   PORT: parseInt(process.env.PORT, 10) || 5000,
   API_URL: process.env.API_URL || 'http://localhost:5000',
   FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:3000',

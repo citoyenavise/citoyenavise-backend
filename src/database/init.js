@@ -5,8 +5,8 @@
 
 const fs = require('fs');
 const path = require('path');
-const { pool } = require('../utils/db');
-const logger = require('../utils/logger');
+const { pool } = require('../core/services/database');
+const logger = require('../core/utils/logger');
 
 async function initDatabase() {
   const client = await pool.connect();

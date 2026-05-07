@@ -9,6 +9,14 @@ const compression = require('compression');
 const swaggerUi = require('swagger-ui-express');
 const config = require('./config');
 const logger = require('./core/utils/logger');
+
+// Validate configuration at startup
+try {
+  config.validate();
+} catch (err) {
+  logger.error('Configuration validation failed', { meta: { error: err.message } });
+  process.exit(1);
+}
 const { errorHandler, notFound, asyncHandler } = require('./core/middleware/errorHandler');
 const { authOptional } = require('./core/middleware/auth');
 const { healthCheck } = require('./core/services/database');
@@ -268,7 +276,7 @@ async function startServer() {
   }
 
   // Start server
-  const PORT = process.env.PORT || 3000;
+  const PORT = config.PORT;
   const server = app.listen(PORT, () => {
     logger.info(`🚀 Backend API running on http://localhost:${PORT}`, {
       meta: { port: PORT, env: process.env.NODE_ENV },
