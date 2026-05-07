@@ -104,7 +104,8 @@ CREATE TABLE IF NOT EXISTS map_nodes (
   profile_id INT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   province VARCHAR(100),
   city VARCHAR(100),
-  geom GEOMETRY(Point, 4326),
+  latitude DECIMAL(10, 😎,
+  longitude DECIMAL(11, 😎,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
